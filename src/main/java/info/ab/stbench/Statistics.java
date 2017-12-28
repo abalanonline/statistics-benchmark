@@ -15,17 +15,8 @@
  */
 package info.ab.stbench;
 
-/**
- * The Class stbench.Main.
- *
- * @author Aleksei Balan
- */
-public class Main {
-
-  public static void main(String[] args) {
-    Main instance = new Main();
-    StatisticsTester tester = new StatisticsTester();
-    tester.runOnce();
-  }
-
+public interface Statistics {
+  void addValue(int value);
+  double getPercentile(int percent);
+  double getMedian();
 }

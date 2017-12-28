@@ -68,6 +68,12 @@ limitations under the License.
       <version>1.7.25</version>
     </dependency>
 
+    <!-- logback -->
+    <dependency>
+      <groupId>ch.qos.logback</groupId>
+      <artifactId>logback-classic</artifactId>
+    </dependency>
+
   </dependencies>
 
   <build>

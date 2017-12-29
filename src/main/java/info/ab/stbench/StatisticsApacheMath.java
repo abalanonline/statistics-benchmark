@@ -15,31 +15,33 @@
  */
 package info.ab.stbench;
 
-import org.apache.jorphan.math.StatCalculatorLong;
+import org.apache.commons.math3.stat.descriptive.DescriptiveStatistics;
+import org.apache.commons.math3.stat.descriptive.rank.Percentile;
 
-public class StatisticsJOrphan implements Statistics {
-  private final StatCalculatorLong calc;
-  public StatisticsJOrphan() {
-    calc = new StatCalculatorLong();
+public class StatisticsApacheMath implements Statistics {
+  private final DescriptiveStatistics statistics;
+  public StatisticsApacheMath() {
+    statistics = new DescriptiveStatistics();
+    statistics.setPercentileImpl((new Percentile()).withEstimationType(Percentile.EstimationType.R_1));
   }
 
   @Override
   public String getName() {
-    return "JOrphan";
+    return "Apache Math";
   }
 
   @Override
   public void addValue(int value) {
-    calc.addValue(value);
+    statistics.addValue(value);
   }
 
   @Override
   public double getPercentile(int percent) {
-    return calc.getPercentPoint(percent / 100D);
+    return statistics.getPercentile(percent);
   }
 
   @Override
   public double getMedian() {
-    return calc.getMedian();
+    return statistics.getPercentile(50);
   }
 }

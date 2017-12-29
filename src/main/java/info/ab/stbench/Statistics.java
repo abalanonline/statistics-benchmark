@@ -16,6 +16,7 @@
 package info.ab.stbench;
 
 public interface Statistics {
+  String getName();
   void addValue(int value);
   double getPercentile(int percent);
   double getMedian();

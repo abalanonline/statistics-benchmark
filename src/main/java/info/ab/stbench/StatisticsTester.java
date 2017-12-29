@@ -18,7 +18,9 @@ package info.ab.stbench;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
@@ -34,14 +36,16 @@ public class StatisticsTester {
 
   public StatisticsTester() {
     statisticsSet = new LinkedHashSet<>();
-    statisticsSet.add(StatisticsJOrphan.class);
+    statisticsSet.add(StatisticsHdrHistogram.class);
+    statisticsSet.add(StatisticsTDigest.class);
     statisticsSet.add(StatisticsApacheMath.class);
+    statisticsSet.add(StatisticsJOrphan.class);
   }
 
-  public void logResult(final String engineName, final String medianType, final boolean haveBug,
+  public void logResult(final String engineName, final String medianType, final double percentile51,
       final long timeAdd, final long timeCalc, final long memAddCalc) {
     LOGGER.info(String.format("%20s | %10s | %10s | %14d | %14d | %14d",
-        engineName, medianType, haveBug?"bug":"ok",
+        engineName, medianType, percentile51 + (percentile51<100.0?" bug":"  ok"),
         timeAdd/1_000_000, timeCalc/1_000_000, memAddCalc/1024));
   }
 
@@ -53,11 +57,11 @@ public class StatisticsTester {
     final String medianType;
     if (median < 30.0) medianType = "low"; else
       if (median > 70.0) medianType = "high"; else medianType = "mid";
-    final boolean haveBug = statistics.getPercentile(51) < 100.0;
+    final double p51 = statistics.getPercentile(51);
     final long mem1 = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
     final long time1 = System.nanoTime();
     for (int i = 0; i < NUM_VALUES; i++) {
-      statistics.addValue(random.nextInt());
+      statistics.addValue(random.nextInt() & Integer.MAX_VALUE);
     }
     final long mem2 = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
     final long time2 = System.nanoTime();
@@ -66,15 +70,18 @@ public class StatisticsTester {
     }
     final long mem3 = Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory();
     final long time3 = System.nanoTime();
-    logResult(statistics.getName(), medianType, haveBug, time2-time1, time3-time2, mem3-mem1);
+    logResult(statistics.getName(), medianType, p51, time2-time1, time3-time2, mem3-mem1);
   }
 
   public void runOnce() {
+    final List<Statistics> memoryLock = new ArrayList<>(); // keep garbage
     LOGGER.info("   statistics engine |     median | percentile |       add (ms) | calculate (ms) |    memory (KB)");
     for (Class<? extends Statistics> statisticsClass : statisticsSet) {
       final StringBuilder stringBuilder = new StringBuilder();
       try {
-        test(statisticsClass.newInstance());
+        final Statistics statistics = statisticsClass.newInstance();
+        test(statistics);
+        memoryLock.add(statistics);
       } catch (final ReflectiveOperationException e) {
         LOGGER.error("", e);
       }

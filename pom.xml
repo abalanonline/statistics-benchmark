@@ -81,6 +81,20 @@ limitations under the License.
       <version>3.6.1</version>
     </dependency>
 
+    <!-- t-digest -->
+    <dependency>
+      <groupId>com.tdunning</groupId>
+      <artifactId>t-digest</artifactId>
+      <version>3.2</version>
+    </dependency>
+
+    <!-- HdrHistogram -->
+    <dependency>
+      <groupId>org.hdrhistogram</groupId>
+      <artifactId>HdrHistogram</artifactId>
+      <version>2.1.10</version>
+    </dependency>
+
 
   </dependencies>
 
